@@ -1,4 +1,4 @@
-const APIEntry = "https://api-baobab.wallet.klaytn.com";
+const APIEntry = "https://api-homepage.kaia.io";
 
 const loadState = (_data) => {
   if (_data.hasOwnProperty("balance")) {
@@ -107,7 +107,11 @@ const updateBalance = () => {
     .then(async function (response) {
       const responseText = await response.text();
       const result = JSON.parse(responseText);
-      loadState({ balance: result.data });
+      if (result.success) {
+        loadState({ balance: result.data.balance });
+      } else {
+        loadState({ balance: "0" });
+      }
     })
     .catch(function (e) {
       console.log(e);
@@ -134,7 +138,12 @@ const onAddressBlur = () => {
   updateBalance();
 };
 
-const runFaucet = () => {
+function runFaucet() {
+  grecaptcha.execute();
+  let captchaRes = grecaptcha.getResponse();
+  if (!captchaRes) {
+    return;
+  }
   const walletAddress = document.getElementById("kaia_address").value;
   if (!isAddress(walletAddress)) {
     loadState({
@@ -149,10 +158,14 @@ const runFaucet = () => {
   loadState({ isRunning: true });
   fetch(`${APIEntry}/faucet/run?address=${walletAddress && walletAddress}`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ recaptcha: captchaRes }),
   })
     .then((res) => res.json())
     .then((res) => {
-      if (res.code == 0) {
+      if (res.success) {
         loadState({
           popupShow: true,
           isError: false,
@@ -175,7 +188,7 @@ const runFaucet = () => {
         updateBalance();
       }, 3000);
     });
-};
+}
 
 const closeFaucetModal = () => {
   loadState({ popupShow: false, isError: false, title: "", content: "" });
@@ -193,6 +206,7 @@ document.addEventListener("DOMContentLoaded", function () {
     .getElementById("kaia_modal_success_close")
     .addEventListener("click", closeFaucetModal);
 });
+
 $(function () {
   $(window).keydown(function (event) {
     if (event.keyCode == 13) {

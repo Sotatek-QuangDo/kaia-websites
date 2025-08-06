@@ -28,6 +28,10 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+input[name=radio] {
+  display: none;
+}
+
 @media screen and (max-width: 479px) {
   .ecosystem-partners-list {
     grid-template-columns: repeat(1, minmax(0, 1fr)) !important;

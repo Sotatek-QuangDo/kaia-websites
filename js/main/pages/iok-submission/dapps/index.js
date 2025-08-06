@@ -1,33 +1,3 @@
-function validateRequiredFieldTextBox(id) {
-  const formControl = document.getElementById(id);
-  let input = formControl.querySelector("input");
-  if (!input) {
-    input = formControl.querySelector("textarea");
-  }
-  const errorDiv = formControl.querySelector(".error-container-2");
-  if (input.value && input.value.length > 0) {
-    gsap.to(errorDiv, {
-      display: "none",
-    });
-    $(formControl).removeClass("has-error");
-    return true;
-  }
-  gsap
-    .timeline()
-    .to(errorDiv, {
-      display: "flex",
-    })
-    .to(
-      errorDiv.children,
-      {
-        display: "flex",
-      },
-      "<"
-    );
-  $(formControl).addClass("has-error");
-  return false;
-}
-
 function validateRequiredSelectBox(id) {
   const formControl = document.getElementById(id);
   let input = formControl.querySelector("select");
@@ -157,150 +127,7 @@ function validateRequiredIndividualSelectBoxes(id) {
   return { isValid: isValid, selectedValues: selectedValues };
 }
 
-function validateValidUrl(formControl) {
-  let input = formControl.querySelector("input");
-  let isValid = true;
-  const errorDiv = formControl.querySelector(".error-container-2");
-  const [_, required] = gsap.utils.toArray(errorDiv.children);
-
-  try {
-    new URL(input.value);
-  } catch (err) {
-    isValid = false;
-  }
-
-  if (isValid) {
-    gsap.to(errorDiv, {
-      display: "none",
-    });
-    $(formControl).removeClass("has-error");
-    return true;
-  }
-
-  gsap
-    .timeline()
-    .to(errorDiv, {
-      display: "flex",
-    })
-    .to(required, {
-      display: "none",
-    });
-  $(formControl).addClass("has-error");
-}
-
-function validateCheckbox(id) {
-  const formControl = document.getElementById(id);
-  const errorDiv = formControl.querySelector(".error-container-2");
-  const input = formControl.querySelector("input");
-
-  if (input.checked) {
-    gsap.to(errorDiv, {
-      display: "none",
-    });
-    $(formControl).removeClass("has-error");
-    return true;
-  }
-
-  gsap.to(errorDiv, {
-    display: "flex",
-  });
-  $(formControl).addClass("has-error");
-
-  return false;
-}
-
-function removeNameTagsOfCheckboxes(id) {
-  const formControl = document.getElementById(id);
-  const inputs = formControl.querySelectorAll("input");
-  for (let i = 0; i < inputs.length; i++) {
-    let elem = inputs[i];
-    if (elem.id.endsWith("-hidden")) {
-      continue;
-    }
-    elem.removeAttribute("data-name");
-    elem.removeAttribute("name");
-  }
-}
-
-function validateCheckboxes(id, fieldName, maxCheckboxes = 0) {
-  let minimum = 1;
-  const formControl = document.getElementById(id);
-  const errorDiv = formControl.querySelector(".error-container-2");
-  const inputs = formControl.querySelectorAll("input");
-  const labels = document.getElementById(id).querySelectorAll("label");
-  let checkedCount = 0;
-  let checkBoxLabels = "";
-  for (let i = 0; i < inputs.length; i++) {
-    let elem = inputs[i];
-    if (elem.id.endsWith("-hidden")) {
-      continue;
-    }
-    if (elem.checked) {
-      ++checkedCount;
-      let label = labels[i].querySelector(".w-form-label").innerHTML;
-      checkBoxLabels += label + ",";
-    }
-  }
-  // Add hidden element to aggregate the checkbox values
-  let checkBoxHiddenId = `${id}-hidden`;
-  if (!document.getElementById(checkBoxHiddenId)) {
-    const hiddenInput = document.createElement("input");
-    hiddenInput.type = "hidden";
-    hiddenInput.name = fieldName;
-    hiddenInput.id = checkBoxHiddenId;
-    hiddenInput.value = checkBoxLabels;
-    hiddenInput.setAttribute("data-name", fieldName);
-
-    formControl.appendChild(hiddenInput);
-  } else {
-    document.getElementById(checkBoxHiddenId).value = checkBoxLabels;
-  }
-
-  if (
-    checkedCount >= minimum &&
-    (maxCheckboxes == 0 || (maxCheckboxes > 0 && checkedCount >= maxCheckboxes))
-  ) {
-    gsap.to(errorDiv, {
-      display: "none",
-    });
-    $(formControl).removeClass("has-error");
-    document.getElementById(checkBoxHiddenId).value = checkBoxLabels;
-    return true;
-  }
-
-  gsap.to(errorDiv, {
-    display: "flex",
-  });
-  $(formControl).addClass("has-error");
-
-  return false;
-}
-
-function validateRequiredRadio(id) {
-  const formControl = document.getElementById(id);
-  const inputs = gsap.utils.toArray(formControl.querySelectorAll("input"));
-  const errorDiv = formControl.querySelector(".error-container-2");
-  let hasChecked = false;
-  inputs.map((radio) => {
-    if (radio.checked) {
-      hasChecked = true;
-      input = radio;
-    }
-  });
-  if (hasChecked) {
-    gsap.to(errorDiv, {
-      display: "none",
-    });
-    $(formControl).removeClass("has-error");
-    return true;
-  }
-  $(formControl).addClass("has-error");
-  gsap.to(errorDiv, {
-    display: "flex",
-  });
-  return false;
-}
-
+// Field Validations
 function validateNameOfDappProject() {
   return validateRequiredFieldTextBox("name-of-project-dapp");
 }
@@ -348,7 +175,7 @@ function validateDappRepresentativeName() {
 }
 
 function validateDappRepresentativeEmail() {
-  return validateRequiredFieldTextBox("representatives-email-dapp");
+  return validateEmail("representatives-email-dapp");
 }
 
 function validateTokenContracts() {
@@ -397,6 +224,21 @@ function skipCategoryOfTheDappOrganization() {
   removeNameTagsOfCheckboxes("category-of-the-project-dapp");
 }
 
+function validateDappWhitepaperDeckUrl() {
+  const formControl = document.getElementById("whitepaper-deck-url-2");
+  const input = formControl.querySelector("input");
+  if (!input.value || input.value.length === 0) {
+    const errorDiv = formControl.querySelector(".error-container-2");
+    errorDiv.style.display = "none";
+    return true;
+  }
+  return validateValidUrl(formControl);
+}
+
+function validateDappReferredBy() {
+  return validateRequiredFieldTextBox("referred-by-dapp");
+}
+
 function attachAddButtonListeners() {
   attachAddButtonListener("requests-dapp");
   attachAddButtonListener("tokencontract-dapp");
@@ -432,6 +274,8 @@ function attachValidationToDappForm() {
     isValid += validateProjectAchievements() ? 0 : 1;
     isValid += validateMilestones() ? 0 : 1;
     isValid += validateExclusiveAccess() ? 0 : 1;
+    isValid += validateDappWhitepaperDeckUrl() ? 0 : 1;
+    isValid += validateDappReferredBy() ? 0 : 1;
 
     if (isValid > 0) {
       const formItemWithErr = document.querySelector(
