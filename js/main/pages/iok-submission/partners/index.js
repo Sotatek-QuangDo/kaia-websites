@@ -174,78 +174,100 @@ function validateRequiredRadio(id) {
 
 // validate logo
 function validateFileRequired(formControl) {
-  const errorDiv = formControl.querySelector('.error-container')
-  const fileUploadInput = formControl.querySelector('.w-file-upload-input')
+  const errorDiv = formControl.querySelector(".error-container");
+  const fileUploadInput = formControl.querySelector(".w-file-upload-input");
   if (fileUploadInput.files && fileUploadInput.files.length > 0) {
     gsap.to(errorDiv, {
-      display: 'none'
-    })
-    $(formControl).removeClass('has-error')
+      display: "none",
+    });
+    $(formControl).removeClass("has-error");
     return true;
   }
-  gsap.timeline()
+  gsap
+    .timeline()
     .to(errorDiv, {
-      display: 'flex'
+      display: "flex",
     })
-    .to(errorDiv.children[1], {
-      display: 'flex'
-    }, '<')
-    .to(errorDiv.children[0], {
-      display: 'none'
-    }, "<")
+    .to(
+      errorDiv.children[1],
+      {
+        display: "flex",
+      },
+      "<"
+    )
+    .to(
+      errorDiv.children[0],
+      {
+        display: "none",
+      },
+      "<"
+    );
 
-  $(formControl).addClass('has-error')
-  return false
+  $(formControl).addClass("has-error");
+  return false;
 }
 
-async function validateImageDimension(formControl, expectedWidth, expectedHeight) {
-  const _URL = window.URL || window.webkitURL
-  const fileUploadInput = formControl.querySelector('.w-file-upload-input')
-  const errorDiv = formControl.querySelector('.error-container')
-  const [imageDimension, required] = gsap.utils.toArray(errorDiv.children)
+async function validateImageDimension(
+  formControl,
+  expectedWidth,
+  expectedHeight
+) {
+  const _URL = window.URL || window.webkitURL;
+  const fileUploadInput = formControl.querySelector(".w-file-upload-input");
+  const errorDiv = formControl.querySelector(".error-container");
+  const [imageDimension, required] = gsap.utils.toArray(errorDiv.children);
 
   function onError() {
-    gsap.timeline()
+    gsap
+      .timeline()
       .to(errorDiv, {
-        display: 'flex'
+        display: "flex",
       })
-      .to(required, {
-        display: 'none'
-      }, "<")
-      .to(imageDimension, {
-        display: "flex"
-      }, "<")
-    $(formControl).addClass('has-error')
+      .to(
+        required,
+        {
+          display: "none",
+        },
+        "<"
+      )
+      .to(
+        imageDimension,
+        {
+          display: "flex",
+        },
+        "<"
+      );
+    $(formControl).addClass("has-error");
   }
 
-  const isValid = await (new Promise((resolve) => {
+  const isValid = await new Promise((resolve) => {
     const img = new Image();
-    const objectUrl = _URL.createObjectURL(fileUploadInput.files[0])
-    img.onload = function() {
-      resolve((expectedWidth <= this.width) && (expectedHeight <= this.height))
-    }
-    img.src = objectUrl
-  }))
+    const objectUrl = _URL.createObjectURL(fileUploadInput.files[0]);
+    img.onload = function () {
+      resolve(expectedWidth <= this.width && expectedHeight <= this.height);
+    };
+    img.src = objectUrl;
+  });
 
   if (isValid) {
     gsap.to(errorDiv, {
-      display: 'none'
-    })
-    $(formControl).removeClass('has-error')
+      display: "none",
+    });
+    $(formControl).removeClass("has-error");
   } else {
-    onError()
+    onError();
   }
-  return isValid
+  return isValid;
 }
 
 function validateProjectLogo() {
-  const formControl = document.getElementById('project-logo');
-  if (formControl.style.display === 'none') {
-      return true;
+  const formControl = document.getElementById("project-logo");
+  if (formControl.style.display === "none") {
+    return true;
   }
-  const requireCheck = validateFileRequired(formControl, true)
-  if (!requireCheck) return requireCheck
-  return validateImageDimension(formControl, 1000, 1000)
+  const requireCheck = validateFileRequired(formControl, true);
+  if (!requireCheck) return requireCheck;
+  return validateImageDimension(formControl, 1000, 1000);
 }
 
 function validateNameOfOrganization() {
@@ -313,7 +335,7 @@ function toggleFormVisibilityBasedOnRadio() {
   const newPartnerRadio = document.getElementById("New-Partner");
   const existingPartnerRadio = document.getElementById("Existing-Partner");
   const formControl = document.getElementById("project-logo");
-  
+
   // Check the initial state of the radio when the load page
   if (newPartnerRadio.checked) {
     formControl.style.display = "block";
@@ -329,9 +351,73 @@ function toggleFormVisibilityBasedOnRadio() {
   });
   existingPartnerRadio.addEventListener("change", function () {
     if (existingPartnerRadio.checked) {
-       formControl.style.display = "none";
+      formControl.style.display = "none";
     }
   });
+}
+
+// Normalize string: remove leading/trailing whitespace and convert to lowercase
+function normalize(str) {
+  return str.trim().toLowerCase();
+}
+
+// Show or hide the "Offering" and "Redeem" fields
+function toggleOfferingAndRedeemFields() {
+  const listOfferingRedeemField = document.getElementById(
+    "box-list-offering-redeem-fields"
+  );
+
+  if (!listOfferingRedeemField) {
+    return;
+  }
+
+  const hasChecked =
+    document.querySelector('input[name="Ignore-Field"]:checked') !== null;
+
+  listOfferingRedeemField.style.display = hasChecked ? "flex" : "none";
+}
+
+// Attach change event listeners to all contribution-type checkboxes
+function setupContributionTypeListener() {
+  const checkboxes = document.querySelectorAll('input[name="Ignore-Field"]');
+  checkboxes.forEach((cb) =>
+    cb.addEventListener("change", toggleOfferingAndRedeemFields)
+  );
+}
+
+// Validation function: at least ONE of the two fields must be filled in
+function validateOfferingAndRedeemFields() {
+  const wrapper = document.getElementById("offering-redeem-fields");
+  const errorBox = document.querySelector(
+    "#box-list-offering-redeem-fields .error-container-2"
+  );
+
+  // If the wrapper is hidden, skip validation
+  if (!wrapper || wrapper.style.display === "none") {
+    if (errorBox) errorBox.style.display = "none";
+    return true;
+  }
+
+  const offering = document.getElementById("Offering-Description");
+  const redeem = document.getElementById("Redemption-Instructions");
+
+  const offeringFilled = offering.value.trim() !== "";
+  const redeemFilled = redeem.value.trim() !== "";
+
+  const isValid = offeringFilled || redeemFilled;
+
+  // Show or hide error box based on validation
+  if (!isValid) {
+    if (errorBox) errorBox.style.display = "flex";
+    offering.classList.add("has-error");
+    redeem.classList.add("has-error");
+  } else {
+    if (errorBox) errorBox.style.display = "none";
+    offering.classList.remove("has-error");
+    redeem.classList.remove("has-error");
+  }
+
+  return isValid;
 }
 
 function attachValidationToPartnerForm() {
@@ -340,8 +426,8 @@ function attachValidationToPartnerForm() {
 
   fauxSubmitButton.addEventListener("click", async () => {
     let isValid = 0;
-    
-    isValid += await validateProjectLogo() ? 0 : 1;
+
+    isValid += (await validateProjectLogo()) ? 0 : 1;
     isValid += validateNameOfOrganization() ? 0 : 1;
     isValid += validateOrganizationsAddress() ? 0 : 1;
     isValid += validateIaman() ? 0 : 1;
@@ -353,6 +439,7 @@ function attachValidationToPartnerForm() {
     // isValid += validateWhitepaper() ? 0 : 1;
     isValid += validateRepresentativeName() ? 0 : 1;
     isValid += validateRepresentativeEmail() ? 0 : 1;
+    isValid += validateOfferingAndRedeemFields() ? 0 : 1;
 
     if (isValid > 0) {
       const formItemWithErr = document.querySelector(
@@ -377,6 +464,8 @@ function PartnerProjectSubmission() {
   gsap.to(".error-container-2", { display: "none" });
   attachValidationToPartnerForm();
   toggleFormVisibilityBasedOnRadio();
+  setupContributionTypeListener();
+  toggleOfferingAndRedeemFields();
 }
 
 $(document).ready(PartnerProjectSubmission);
