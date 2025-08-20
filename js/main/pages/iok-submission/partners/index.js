@@ -99,82 +99,82 @@ function toggleFormVisibilityBasedOnRadio() {
   });
 }
 
-  // Normalize a string: trim whitespace and convert to lowercase
-  function normalize(str) {
-    return str.trim().toLowerCase();
+// Normalize a string: trim whitespace and convert to lowercase
+function normalize(str) {
+  return str.trim().toLowerCase();
+}
+
+// Show or hide the Offering and Redeem fields based on selected checkboxes
+function toggleOfferingAndRedeemFields() {
+  const listOfferingRedeemField = document.getElementById(
+    "box-list-offering-redeem-fields"
+  );
+
+  if (!listOfferingRedeemField) {
+    console.warn("Offering or Redeem fields not found in the DOM.");
+    return;
   }
 
-  // Show or hide the Offering and Redeem fields based on selected checkboxes
-  function toggleOfferingAndRedeemFields() {
-    const listOfferingRedeemField = document.getElementById("box-list-offering-redeem-fields");
+  // Define allowed labels that should trigger showing the fields
+  const allowedLabels = ["price discount", "free trial", "special offering"];
 
-    if (!listOfferingRedeemField) {
-      console.warn("Offering or Redeem fields not found in the DOM.");
-      return;
-    }
+  // Get all checked checkboxes with the name "Ignore-Field"
+  const selectedCheckboxes = Array.from(
+    document.querySelectorAll('input[name="Ignore-Field"]:checked')
+  );
 
-    // Define allowed labels that should trigger showing the fields
-    const allowedLabels = [
-      "price discount",
-      "free trial",
-      "special offering",
-      "funding",
-      "networking",
-      "accelerating",
-      "others"
-    ];
+  // Check if any selected checkbox matches one of the allowed labels
+  const shouldShow = selectedCheckboxes.some((checkbox) => {
+    const labelText = checkbox.nextElementSibling?.innerText;
+    return allowedLabels.includes(normalize(labelText));
+  });
 
-    // Get all checked checkboxes with the name "Ignore-Field"
-    const selectedCheckboxes = Array.from(document.querySelectorAll('input[name="Ignore-Field"]:checked'));
+  // Show or hide the field container based on the selection
+  listOfferingRedeemField.style.display = shouldShow ? "flex" : "none";
+}
 
-    // Check if any selected checkbox matches one of the allowed labels
-    const shouldShow = selectedCheckboxes.some(checkbox => {
-      const labelText = checkbox.nextElementSibling?.innerText;
-      return allowedLabels.includes(normalize(labelText));
-    });
+// Attach change event listeners to all contribution-type checkboxes
+function setupContributionTypeListener() {
+  const checkboxes = document.querySelectorAll('input[name="Ignore-Field"]');
+  checkboxes.forEach((cb) =>
+    cb.addEventListener("change", toggleOfferingAndRedeemFields)
+  );
+}
 
-    // Show or hide the field container based on the selection
-    listOfferingRedeemField.style.display = shouldShow ? "flex" : "none";
+// Validate: At least one of the two fields must be filled
+function validateOfferingAndRedeemFields() {
+  const wrapper = document.getElementById("offering-redeem-fields");
+  const errorBox = document.querySelector(
+    "#box-list-offering-redeem-fields .error-container-2"
+  );
+
+  // If the fields are hidden, skip validation
+  if (!wrapper || wrapper.style.display === "none") {
+    if (errorBox) errorBox.style.display = "none";
+    return true; // No validation needed
   }
 
-  // Attach change event listeners to all contribution-type checkboxes
-  function setupContributionTypeListener() {
-    const checkboxes = document.querySelectorAll('input[name="Ignore-Field"]');
-    checkboxes.forEach(cb => cb.addEventListener("change", toggleOfferingAndRedeemFields));
+  const offering = document.getElementById("Offering-Description");
+  const redeem = document.getElementById("Redemption-Instructions");
+
+  const offeringFilled = offering?.value.trim() !== "";
+  const redeemFilled = redeem?.value.trim() !== "";
+
+  const isValid = offeringFilled || redeemFilled;
+
+  // Show or hide the error message based on validation result
+  if (!isValid) {
+    if (errorBox) errorBox.style.display = "flex";
+    offering?.classList.add("has-error");
+    redeem?.classList.add("has-error");
+  } else {
+    if (errorBox) errorBox.style.display = "none";
+    offering?.classList.remove("has-error");
+    redeem?.classList.remove("has-error");
   }
 
-  // Validate: At least one of the two fields must be filled
-  function validateOfferingAndRedeemFields() {
-    const wrapper = document.getElementById("offering-redeem-fields");
-    const errorBox = document.querySelector("#box-list-offering-redeem-fields .error-container-2");
-
-    // If the fields are hidden, skip validation
-    if (!wrapper || wrapper.style.display === "none") {
-      if (errorBox) errorBox.style.display = "none";
-      return true; // No validation needed
-    }
-
-    const offering = document.getElementById("Offering-Description");
-    const redeem = document.getElementById("Redemption-Instructions");
-
-    const offeringFilled = offering?.value.trim() !== "";
-    const redeemFilled = redeem?.value.trim() !== "";
-
-    const isValid = offeringFilled || redeemFilled;
-
-    // Show or hide the error message based on validation result
-    if (!isValid) {
-      if (errorBox) errorBox.style.display = "flex";
-      offering?.classList.add("has-error");
-      redeem?.classList.add("has-error");
-    } else {
-      if (errorBox) errorBox.style.display = "none";
-      offering?.classList.remove("has-error");
-      redeem?.classList.remove("has-error");
-    }
-
-    return isValid;
-  }
+  return isValid;
+}
 
 function attachValidationToPartnerForm() {
   const fauxSubmitButton = document.getElementById("faux-submit-button");
