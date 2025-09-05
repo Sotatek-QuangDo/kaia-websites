@@ -77,7 +77,7 @@ function validateEmail(id) {
 
   const errorDiv = formControl.querySelector(".error-container-2");
   const email = input.value.trim();
-  const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+  const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,15}$/;
 
   if (email.length === 0) {
     errorDiv.querySelector("p").textContent =
