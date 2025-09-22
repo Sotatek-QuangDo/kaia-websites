@@ -5,3 +5,12 @@
 .menu-button.w--open {
     background-color: transparent;
 }
+
+.w-select,
+select {
+    background-color: #1e1e1e;
+    color: #ffffff;
+    border: 1px solid #444;
+    padding: 8px 36px 8px 12px;
+    font-size: 14px;
+}
